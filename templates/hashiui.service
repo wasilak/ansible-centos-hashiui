@@ -1,0 +1,23 @@
+[Unit]
+Description=hashi-ui agent
+Requires=network-online.target
+After=consul.service nomad.service
+
+[Service]
+User={{ hashiui_user }}
+Group={{ hashiui_group }}
+PIDFile=/run/hashiui/hashiui.pid
+#Restart=on-failure
+
+# waiting a little bit for consul and nomad to start
+ExecStartPre=/bin/sleep 10
+
+ExecStart={{ executable_location }} $OPTIONS {% if nomad_enabled %} --nomad-enable --nomad-address http://{{ server_ip }}:4646 {% endif %} {% if consul_enabled %} --consul-enable --consul-address http://{{ server_ip }}:8500 {% endif %}
+
+ExecReload=/bin/kill -HUP $MAINPID
+
+KillSignal=SIGTERM
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

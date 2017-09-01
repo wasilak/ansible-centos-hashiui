@@ -1,0 +1,6 @@
+---
+
+- name: "restart hashiui service"
+  service:
+    name: "hashiui"
+    state: restarted

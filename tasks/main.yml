@@ -1,0 +1,36 @@
+---
+- name: "Download hashiui"
+  get_url:
+    url: "{{ download_url }}"
+    dest: "{{ executable_location }}"
+    mode: 0755
+  notify: "restart hashiui service"
+
+- name: "Creating {{ hashiui_user }} group"
+  group:
+    name: "{{ hashiui_group }}"
+    state: present
+
+- name: "Creating {{ hashiui_user }} user"
+  user:
+    name: "{{ hashiui_user }}"
+    group: "{{ hashiui_group }}"
+    state: present
+
+- name: "Setting systemd service"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - {
+        src: "templates/hashiui.service",
+        dest: "/etc/systemd/system/hashiui.service"
+      }
+  notify: "restart hashiui service"
+
+- name: "Enabling service"
+  service:
+    name: hashiui
+    enabled: yes
+  notify: "restart hashiui service"
+
